@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(janitor)
+library(broom)
 ```
 Introduction
 - relevant background information of basketball, including key metrics, position requirements etc
@@ -157,22 +158,48 @@ player_stats <- player_stats %>%
 # check for an NA values
 player_stats[!complete.cases(player_stats),]
 
-write_csv(player_stats, "data/processed/cleaned_player_stats.csv")
+write_csv(player_stats, "data/processed/cleaned_player-stats.csv")
 ```
 
 ```{r Team stats}
+# read in,  remove NA cols and clean col names
 team_stats1 <- read_csv("data/raw/2018-19_nba_team-statistics_1.csv")
+team_stats1$X23 <- NULL
+team_stats1$X24 <- NULL
+team_stats1$X25 <- NULL
+team_stats1 <- clean_names(team_stats1) 
+
+# read in and clean names
 team_stats2 <- read_csv("data/raw/2018-19_nba_team-statistics_2.csv")
-```
+team_stats2 <- clean_names(team_stats2) 
 
-```{r Team Payroll}
+# join the two team stats together
+team_stats <- left_join(team_stats1, team_stats2, by = "team")
+team_stats[!complete.cases(team_stats),]
+team_stats <- clean_names(team_stats)
+
+# read in payroll
 team_payroll <- read_csv("data/raw/2019-20_nba_team-payroll.csv")
-```
+# remove non numeric characters and convert to numeric
+team_payroll$salary <- gsub(",", "", team_payroll$salary)
+team_payroll$salary <- gsub("\\$", "", team_payroll$salary)
+team_payroll$salary <- as.numeric(team_payroll$salary)
 
-```{r Player Salaries}
-player_salaries <- read_csv("data/raw/2018-19_nba_player-salaries.csv")
-```
+# read in additional data that contains the team names from the payroll and team stats
+team_names <- read_csv("data/raw/team-salary-name_team-stats-name.csv")
 
+# match the team stats name to the payroll name and drop the payroll name
+team_payroll <- team_payroll %>% 
+  right_join(team_names, by = "team") %>% 
+  select(-team) %>% 
+  rename(team = team_stats_name)
+
+# join the payroll to the team_stats master data
+team_stats <- left_join(team_stats, team_payroll, by = "team")
+
+#write out to the processed folder
+write_csv(team_stats, "data/processed/cleaned_team-stats.csv")
+```
 Exploratory analysis
 This section should document your exploratory data analysis and may include but is not limited to:
 - checking for errors and missing values within the datasets
@@ -181,7 +208,59 @@ This section should document your exploratory data analysis and may include but 
 - justification for decisions made about data modelling
 Note that this section and the data cleaning section may be an iterative process, as you might find things about the data that need to be 'cleaned up' once you have explored the data further. 
 ```{r}
+tm_stats <- read_csv("data/processed/cleaned_team-stats.csv")
+sum(is.na(tm_stats))
 
+# convert stats to per game
+tm_stats <- tm_stats %>% 
+  mutate(mp = mp/g,
+            fg = fg/g,
+            fga = fga/g,
+            fg_percent = fg/fga,
+            x3p = x3p/g,
+            x3pa = x3pa/g,
+            x3p_percent = x3p/x3pa,
+            x2p = x2p/g,
+            x2pa = x2pa/g,
+            x2p_percent = x2p/x2pa, 
+            ft = ft/g,
+            fta = fta/g,
+            ft_percent = ft/fta,
+            orb = orb/g,
+            drb = drb/g,
+            trb = trb/g,
+            ast = ast/g,
+            stl = stl/g,
+            blk = blk/g,
+            tov = tov/g,
+            pf = pf/g,
+            pts = pts/g)
+
+# variables removed as they are a potentially a result of the points scored and not an indicator for them
+tm_stats <- tm_stats %>% 
+  select(!c(g, rk_x, rk_y, team_id, w, l, pw, pl))
+  
+ggplot(tm_stats, aes(pts)) +
+  geom_histogram(colour = '#048BA8', fill = '#16DB93', alpha = 0.8, binwidth = 2) 
+
+source("funs/gg_scatter.R")
+
+numeric_vars <- tm_stats %>% 
+  select(where(is.numeric),- pts) %>% 
+  names(.)
+
+for (i in seq_along(numeric_vars)) {
+  print(gg_scatter(tm_stats, numeric_vars[i]))
+}
+tm_stats %>% 
+  select(is.numeric) %>% 
+  corrr::correlate() %>% 
+  corrr::focus(pts) %>%
+  arrange(pts) 
+
+# remove low correlations between -0.2 and 0.2
+tm_stats <- tm_stats %>% 
+  select(!c("x2pa", "drb_percent", "mp", "tov", "salary", "pf", "tov_percent", "ft_percent", "stl", "f_tr", "orb", "team"))
 ```
 Data modelling and results
 This section may include but is not limited to:
@@ -189,16 +268,66 @@ This section may include but is not limited to:
 - assumption checking
 - model output and interpretation of your model
 ```{r}
+# Model
+fit <- lm(pts ~ ., tm_stats)
+tidy(fit, conf.int = T)
 
+# Linearity
+car::avPlots(fit)
+
+tm_stats <- tm_stats %>% 
+  select(!c("x3p_percent", "fta", "fg_percent", "fga", "x2p", "blk", "age", "x3p_ar", "orb_percent", "drb", "trb"))
+
+# multicolinety
+cor_mat <- tm_stats %>% 
+  select(where(is.numeric)) %>% 
+  cor(., method = 'spearman')
+
+# select the variables that display multicolinearty above 0.8
+cor_features <- caret::findCorrelation(cor_mat, cutoff = 0.8, names = T, exact = FALSE)
+
+# removing the variables that contain evidence of multicolinearty
+tm_stats <- tm_stats %>% 
+  select(-cor_features)
+
+GGally::ggcorr(tm_stats, method = c('pairwise','spearman'), 
+               size = 2 )
+
+fit <- lm(pts ~ ., tm_stats)
+
+# Variance Inflation Factor
+car::vif(fit)
+sqrt(car::vif(fit))
+
+tm_stats <- tm_stats %>% 
+  select(!c(srs, o_rtg, d_rtg, pace, fg))
+
+fit <- lm(pts ~ ., tm_stats)
+tidy(fit, conf.int = T)
+summary(fit)
 ```
 Player recommendations
 This section will be the key part that is presented to the general manager. Here you should present your recommendations for the best five starting players, but also think about what other important information they would want to know, and how it is best to present that information to them. 
 ```{r}
+team_mins <- read_csv("data/processed/cleaned_team-stats.csv")
 
+min_per_game <- team_mins %>% 
+  group_by(team) %>% 
+  summarise(ave_mins = mean(mp)/ g) %>% 
+  pull %>% 
+  mean
+
+player_stats <- read_csv("data/processed/cleaned_player-stats.csv")
+
+player_stats %>% 
+  group_by(player_name) %>% 
+  summarise(G = sum(mp)/ min_per_game,
+            x3pa_per_game = sum(x3pa)/G)
 ```
 Summary 
 Provide a brief summary which describes the key points and findings from your project. It will also be important to acknowledge any limitations of your model and overall approach to answering the question asked of you by the general manager.
 ```{r}
+player_stats[player_stats$player_name == "Aaron Gordon" | player_stats$player_name == "Aaron Holiday", c("player_name", "mp", "x3pa")] 
 
 ```
 Reference List
