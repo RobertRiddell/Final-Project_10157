@@ -1,0 +1,6 @@
+File Name: 2018-19_nba_player-salaries.csv 
+This data file contains the salary for individual players during the 2018-19 NBA season. The variables consist:
+
+player_id : unique player identification number
+player_name : player name
+salary : year salary in $USD

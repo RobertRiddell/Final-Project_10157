@@ -1,0 +1,6 @@
+File Name: 2018-19_nba_team-payroll.csv 
+This data file contains the team payroll budget for the 2019-20 NBA season. The variables consist:
+
+team_id : unique team identification number
+team : team name
+salary : team payroll budget in 2019-20 in $USD

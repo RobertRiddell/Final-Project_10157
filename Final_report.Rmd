@@ -1,0 +1,58 @@
+---
+title: "Final_report"
+author: "R.Riddell"
+date: "26/04/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Introduction
+- relevant background information of basketball, including key metrics, position requirements etc
+- description of the scenario
+- the aim of the project
+- justification and importance
+```{r}
+
+```
+Reading and cleaning the raw data
+This section should document the process used to read and clean the raw data. It should also include a description of the data sets used and variables in each. For brevity, you could provide a link to the specific variable descriptions, rather than writing these out in full within your report. 
+```{r}
+
+```
+Exploratory analysis
+This section should document your exploratory data analysis and may include but is not limited to:
+- checking for errors and missing values within the datasets
+- checking the distribution of variables
+- checking for relationships between variables, or differences between groups
+- justification for decisions made about data modelling
+Note that this section and the data cleaning section may be an iterative process, as you might find things about the data that need to be 'cleaned up' once you have explored the data further. 
+```{r}
+
+```
+Data modelling and results
+This section may include but is not limited to:
+- data modelling (e.g. creating a linear regression)
+- assumption checking
+- model output and interpretation of your model
+```{r}
+
+```
+Player recommendations
+This section will be the key part that is presented to the general manager. Here you should present your recommendations for the best five starting players, but also think about what other important information they would want to know, and how it is best to present that information to them. 
+```{r}
+
+```
+Summary 
+Provide a brief summary which describes the key points and findings from your project. It will also be important to acknowledge any limitations of your model and overall approach to answering the question asked of you by the general manager.
+```{r}
+
+```
+Reference List
+Provide a reference list of any sources you used in the development of your report and justification of your arguments. Please use the Vancouver reference style (Links to an external site.) for the reference list and in-text references. 
+```{r}
+
+```
+
+ 
