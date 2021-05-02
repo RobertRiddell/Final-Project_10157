@@ -4,8 +4,12 @@ library(janitor)
 player_stats <- read_csv("data/raw/2018-19_nba_player-statistics.csv")
 str(player_stats)
 
-# clean names to remove % and when a number is the column name
+# clean variable names to remove % and when a number is the column name
 player_stats <- clean_names(player_stats)
+
+# Remove the total rows and leave the individuals tema rows for position and team calacultion
+player_stats <- player_stats %>% 
+  filter(!tm == "TOT")
 
 # view which  players are duplicated and if they ahev a different age recorded
 player_stats %>% 

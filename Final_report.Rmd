@@ -11,11 +11,19 @@ library(tidyverse)
 library(janitor)
 library(broom)
 ```
-Introduction
-- relevant background information of basketball, including key metrics, position requirements etc
-- description of the scenario
-- the aim of the project
-- justification and importance
+# Introduction
+## Background
+Basketball is a team sport composed of 5 players per team and was invented around 1891 by James Naismith. https://www.britannica.com/sports/basketball. The game has evolved signifntly since then and is now a very popular and lucaratcive sport internationalal. Both players and organistions are able to earn a signfinat amount of money through sponsorship and media rights. In an attempt to even the financial playing field a the modern salary cap was introduced in the 1984-85 season with a #3,600,00 cap. The salary system has grown into a very complex and regualted system that ensures organisation's aren't able to spend any money they want on players. The NBA salary system is descriped as a soft cap due to a system of salary cap exceptions and is based off teams basketabll related income. Due to the NBA operating a soft cap it means their can be some range in what salary can be committed to players. Organisations needs to very strategic in the way they structure player contract in order to maximse the money they spend. https://cbabreakdown.com/salary-cap-overview
+
+## Scenario
+The Chicago Bulls finished 27 from 30 teams in the most recent season, totally 22 wins from 82 games. Their point production was 104.5 points per game which ranks as the 26 out of 30 teams. As opposed to the Milwaukee Bucks who excelled with 60 wins and an average points per game of 118.1. The Chicago Bulls are coming into this season with an available \$118 million dollars for contracting players, which is 26 out of 30 compared to the rest of the league. Where the Milwaukee Bucks had \$131 million budget, showing the disapartity on avaiable budgets. 
+
+## Aim
+The aim of this report is to flag and identify players that will enhance the probabaility of the Chicago Bulls winning more games than last season. 
+
+## Justification
+The reason this report is nesscacry is shown by the discrepency between what can be spent on players and what the Chicago Bulls can spend on players. This discrepenacy highlights that the Chicago Bulls are not able to just recruit any player and instead must be strategic to ensure they buy players that will have a positive influence on winning for their team. 
+
 
 Reading and cleaning the raw data
 This section should document the process used to read and clean the raw data. It should also include a description of the data sets used and variables in each. For brevity, you could provide a link to the specific variable descriptions, rather than writing these out in full within your report. 
@@ -239,19 +247,28 @@ min_per_game <- team_mins %>%
 
 player_stats <- read_csv("data/processed/cleaned_player-stats.csv")
 
+#players <- player_stats %>% 
+  #group_by(player_name) %>% 
+  #summarise(G = sum(mp)/ min_per_game,
+            #f_tr = (fta/fga),
+            #ts_percent = pts / ((.44*fta + fga)*2),
+            #fga = sum(fga)/G,
+            #x3pa = sum(x3pa)/G,
+            #x2p = sum(x2p)/G,
+            #trb = sum(trb)/G,
+            #ast = sum(ast)/G,
+            #blk = sum(blk)/G,
+            #MP = sum(mp)) %>% 
+  #select(-G) 
+
 players <- player_stats %>% 
-  group_by(player_name) %>% 
+  group_by(player_name) %>%
   summarise(G = sum(mp)/ min_per_game,
             f_tr = (fta/fga),
             ts_percent = pts / ((.44*fta + fga)*2),
-            fga = sum(fga)/G,
-            x3pa = sum(x3pa)/G,
-            x2p = sum(x2p)/G,
-            trb = sum(trb)/G,
-            ast = sum(ast)/G,
-            blk = sum(blk)/G,
-            MP = sum(mp)) %>% 
-  select(-G) 
+            fga = sum(fga)/G)
+
+
 ```
 
 ```{r}
@@ -271,8 +288,51 @@ player_stats <- left_join(player_stats, players, by = "player_name")
 
 player_stats %>% 
   select(player_name, age, mp, Pos, salary, exp_pts) %>% 
+  filter(mp > 300 & Pos =="PF") %>% 
+  arrange(-exp_pts) 
+
+player_stats %>% 
+  select(player_name, age, mp, Pos, salary, exp_pts) %>% 
   filter(mp > 300) %>% 
-  arrange(-exp_pts)
+  mutate(salary_points_ratio = exp_pts/salary) %>% 
+  arrange(-salary_points_ratio) %>% 
+  filter(Pos == "C")
+# Jordan McRae	      27	333	  SG	77250	    116.136416	
+# Christian Wood      23	502	  PF	1512601	  159.108397	
+# Spencer Dinwiddie	  25	1914	PG	1656092	  141.702753
+# Thomas Bryant	      21	1496	C	  1378242	  124.43076		
+# Caris LeVert	      24	1063	SF	1702800	  126.46152	
+
+# 77,250 + 1,512,601 + 1,656,092 + 1,378,242 + 1,702,800 = 6,326,985
+# 116.136416 + 159.108397 + 141.702753 + 124.43076 + 126.46152 = 667.8398
+
+player_stats %>% 
+  select(player_name, age, mp, Pos, salary, exp_pts) %>% 
+  filter(mp > 300) %>% 
+  arrange(-exp_pts) %>% 
+  filter(Pos == "C")
+# D'Angelo Russell	  22	2448	PG	7019698	  175.12603
+# Devin Booker	      22	2242	SG	3314365	  177.381624
+# Kawhi Leonard	      27	2040	SF	23114066	180.49953
+# Christian Wood	     23	502	  PF	1512601	  159.10840
+# Karl-Anthony Towns	23	2545	C	  7839435	  170.98054
+
+# 7,019,698 + 3,314,365 + 23,114,066 + 1,512,601 + 7,839,435 = 42,800,165
+# 175.12603 + 177.381624 + 180.49953 + 159.10840 + 170.98054 = 863.0961
+
+player_stats %>% 
+  select(player_name, age, mp, Pos, salary, exp_pts) %>% 
+  filter(mp > 300) %>% 
+  arrange(-exp_pts) %>% 
+  filter(Pos == "C")
+# James Harden	          29	2867	PG	30570000	219.13162
+# Devin Booker	          22	2242	SG	3314365	  177.381624
+# Kawhi Leonard	          27	2040	SF	23114066	180.49953
+# Giannis Antetokounmpo	  24	2358	PF	24157304	188.13349
+# Joel Embiid	            24	2154	C	  25467250	186.03184
+
+# 30570000 + 3314365 + 23114066 + 24157304 + 25467250 = 106,622,985
+# 219.13162 + 177.381624 + 180.71463 + 188.13349 + 186.03184 = 951.3932
 
 
 ```
@@ -281,9 +341,6 @@ Summary
 Provide a brief summary which describes the key points and findings from your project. It will also be important to acknowledge any limitations of your model and overall approach to answering the question asked of you by the general manager.
 ```{r}
 
-30570000 + 3314365 + 7839435 + 8641000 + 23114066
-
-# Harden, Booker, Karl - Anthony Towns, Julius Randle, Kyrie Irving
 ```
 Reference List
 Provide a reference list of any sources you used in the development of your report and justification of your arguments. Please use the Vancouver reference style (Links to an external site.) for the reference list and in-text references. 
