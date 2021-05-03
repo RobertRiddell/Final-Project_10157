@@ -11,7 +11,7 @@ player_stats <- clean_names(player_stats)
 player_stats <- player_stats %>% 
   filter(!tm == "TOT")
 
-# view which  players are duplicated and if they ahev a different age recorded
+# view which  players are duplicated and if they have a different age recorded
 player_stats %>% 
   group_by(player_name, age) %>% 
   count() %>% 
@@ -21,7 +21,7 @@ player_stats %>%
 
 # some players have multiple positions listed so a primary position based on which one 
 ## they have played the most games on needs to be attributed
-player_stats[player_stats$player_name == "Thon Maker",c("player_name", "pos")]
+player_stats[player_stats$player_name == "Thon Maker",c("player_name","tm", "pos")]
 
 # create a table that conatins how many games each player has played at each position
 position_game <- player_stats %>% 
@@ -38,7 +38,7 @@ position_game <- position_game %>%
   summarize_at(position_names, sum) %>%
   ungroup()
 
-# return the column index of teh position the player has teh max games
+# return the column index of the position the player has teh max games
 pos <- position_game %>% 
   select(position_names) %>% 
   apply(., 1, which.max)

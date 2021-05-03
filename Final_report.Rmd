@@ -13,32 +13,55 @@ library(broom)
 ```
 # Introduction
 ## Background
-Basketball is a team sport composed of 5 players per team and was invented around 1891 by James Naismith. https://www.britannica.com/sports/basketball. The game has evolved signifntly since then and is now a very popular and lucaratcive sport internationalal. Both players and organistions are able to earn a signfinat amount of money through sponsorship and media rights. In an attempt to even the financial playing field a the modern salary cap was introduced in the 1984-85 season with a #3,600,00 cap. The salary system has grown into a very complex and regualted system that ensures organisation's aren't able to spend any money they want on players. The NBA salary system is descriped as a soft cap due to a system of salary cap exceptions and is based off teams basketabll related income. Due to the NBA operating a soft cap it means their can be some range in what salary can be committed to players. Organisations needs to very strategic in the way they structure player contract in order to maximse the money they spend. https://cbabreakdown.com/salary-cap-overview
+Basketball is a team sport composed of 5 players per team and was invented around 1891 by James Naismith^(1)^. The game has evolved signifntly since then and is now a very popular and lucaratcive sport internationalal. Both players and organistions are able to earn a signfinat amount of money through sponsorship and media rights^(2)^. In an attempt to even the financial playing field a the modern salary cap was introduced in the 1984-85 season with a \$3,600,00 cap. The salary system has grown into a very complex and regualted system that ensures organisation's aren't able to spend any money they want on players. The NBA salary system is descriped as a soft cap due to a system of salary cap exceptions and is based off teams basketabll related income. Due to the NBA operating a soft cap it means their can be some range in what salary can be committed to players. Organisations needs to very strategic in the way they structure player contract in order to maximse the money they spend^(3).^ \n
 
 ## Scenario
-The Chicago Bulls finished 27 from 30 teams in the most recent season, totally 22 wins from 82 games. Their point production was 104.5 points per game which ranks as the 26 out of 30 teams. As opposed to the Milwaukee Bucks who excelled with 60 wins and an average points per game of 118.1. The Chicago Bulls are coming into this season with an available \$118 million dollars for contracting players, which is 26 out of 30 compared to the rest of the league. Where the Milwaukee Bucks had \$131 million budget, showing the disapartity on avaiable budgets. 
+The Chicago Bulls finished 27 from 30 teams in the most recent season, totally 22 wins from 82 games. Their point production was 104.5 points per game which ranks as the 26 out of 30 teams. As opposed to the Milwaukee Bucks who excelled with 60 wins and an average points per game of 118.1. The Chicago Bulls are coming into this season with an available \$118 million dollars for contracting players, which is 26 out of 30 compared to the rest of the league. Where the Milwaukee Bucks had \$131 million budget, showing the disapartity on avaiable budgets. \n
 
 ## Aim
-The aim of this report is to flag and identify players that will enhance the probabaility of the Chicago Bulls winning more games than last season. 
+The aim of this report is to flag and identify players that will enhance the probabaility of the Chicago Bulls winning more games than last season. \n
 
 ## Justification
-The reason this report is nesscacry is shown by the discrepency between what can be spent on players and what the Chicago Bulls can spend on players. This discrepenacy highlights that the Chicago Bulls are not able to just recruit any player and instead must be strategic to ensure they buy players that will have a positive influence on winning for their team. 
+The reason this report is nesscacry is shown by the discrepency between what can be spent on players and what the Chicago Bulls can spend on players. This discrepenacy highlights that the Chicago Bulls are not able to just recruit any player and instead must be strategic to ensure they buy players that will have a positive influence on winning for their team. \n
 
 
-Reading and cleaning the raw data
-This section should document the process used to read and clean the raw data. It should also include a description of the data sets used and variables in each. For brevity, you could provide a link to the specific variable descriptions, rather than writing these out in full within your report. 
-[Data Descriptions](https://github.com/RobertRiddell/Final-Project_10157/tree/main/data-descriptions)
+# Wrangling data
+The descriptions and infomrtion about the data used in this report can be found at [Data Descriptions](https://github.com/RobertRiddell/Final-Project_10157/tree/main/data-descriptions). \n
 
-[Calcualte Effectiev Field Goal] (https://www.basketball-reference.com/about/glossary.html#:~:text=eFG%25%20%2D%20Effective%20Field%20Goal%20Percentage,a%202%2Dpoint%20field%20goal.)
+## Player Data
 ```{r Player Stats}
 # Running the cleaning scripts from the funs folder to seperate the cleaninig and model analysis
 source("funs/clean_player-stats.R")
-```
+obs_var1 <- dim(player_stats) 
+num_players <- length(unique(player_stats$player_name))
+two_team_players <- player_stats %>% 
+  group_by(player_name, age) %>% 
+  count() %>% 
+  filter(n >1) %>% 
+  pull %>%  
+  length()
 
+
+```
+The player data consited of `r obs_var1[2]` variables and `r obs_var1[1]` observations tabulated fromthe 2018/19 season. This data set included `r num_players` unique players which is assumed to be all of the active players in the league.
+
+The data relavant to players was read in and cleaned in accordance with the tidyr principles https://tidyr.tidyverse.org/articles/tidy-data.html. \n
+The first issue that needed investigating was when a player had been traded during the season had both the statistcis for the teams they had played for and a total row for all their statistics. There was `r two_team_players` players affected by this issue.  To resolve this issue the total row for affected players was removed from the data, leaving some players with multiple rows. \n
+
+The next issue noted was some players had different positions listed, such as Thon Maker who was listed as a PF for Detroit and a Center for Milwakee. It was decided that the player would be assigned the poistion they played the most games at. To do this the number of games was totalled for all players and a new postion list was tabulated to overwrite the old positions. This function reassigned the players poistion on all observations to teh position they played most during the season. \n
+
+These players also had a secondary issue where they had different teams listed due to being traded. This issue was solved using the same method as the positions, where the player was assigne th etam they played the most amount of games from. The player data was then grouped under each name so each player only had one observation in the dataset. \n
+
+After grouping the data together there was some calculation errors discovered in some of the field goal percentage statistics. These issues arose as some filed goal values presenetd as NA and some attempt values were 0 so after the field goal calucaltion were completed the resultant figure was invalid. The second issed occured through a zero division error as there was not attempted shots so therofore the divsion resulted in an NA instead of a zero. During the recalcuation the effective field goal statistics was also included in the data, this statistics takes into account the extra worth of a 3 point percentage. The effective field goal is calcualted by using the formula  $(FG + 0.5 * 3P) / FGA$^(4)^. \n
+
+## Team Data
 ```{r Team stats}
 # Running the cleaning scripts from the funs folder to seperate the cleaninig and model analysis
 source("funs/clean_team-stats.R")
+obs_var2 <- dim(team_stats)
 ```
+The team data was sourced from three different sources, two differnet set of statistics and another seperate file that contained team payroll information. The statistical information was for each team and collected form the 2018/19 season. The two sets of team statistics were combined with the team based statistics such as pace and offensice rating removed as they were adjudged to not be applicable for player selection. The payroll data was then added to the team based data leaving the data with `r obs_var2[2]` variables and `r obs_var2[1]` observations.
+
 
 Exploratory analysis
 This section should document your exploratory data analysis and may include but is not limited to:
@@ -344,5 +367,10 @@ Provide a brief summary which describes the key points and findings from your pr
 ```
 Reference List
 Provide a reference list of any sources you used in the development of your report and justification of your arguments. Please use the Vancouver reference style (Links to an external site.) for the reference list and in-text references. 
+
+1.	Donald LW, Logan RG, Mokray WG. Basketball. In: Encyclopedia Britannica. 2021.
+2.	Reiff N. How the NBA makes money [Internet]. Investopedia.com. 2020 [cited 2021 May 3]. Available from: https://www.investopedia.com/articles/personal-finance/071415/how-nba-makes-money.asp
+3.	CBA Breakdown [Internet]. Cbabreakdown.com. [cited 2021 May 3]. Available from: https://cbabreakdown.com/salary-cap-overview
+4. Page B, Page B. Glossary | Basketball-Reference.com [Internet]. Basketball-Reference.com. 2021 [cited 3 May 2021]. Available from: https://www.basketball-reference.com/about/glossary.html#:~:text=eFG%25%20%2D%20Effective%20Field%20Goal%20Percentage,a%202%2Dpoint%20field%20goal
 
  
