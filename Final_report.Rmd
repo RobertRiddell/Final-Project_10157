@@ -29,7 +29,7 @@ The reason this report is nesscacry is shown by the discrepency between what can
 The descriptions and infomrtion about the data used in this report can be found at [Data Descriptions](https://github.com/RobertRiddell/Final-Project_10157/tree/main/data-descriptions). \n
 
 ## Player Data
-```{r Player Stats}
+```{r include=F}
 # Running the cleaning scripts from the funs folder to seperate the cleaninig and model analysis
 source("funs/clean_player-stats.R")
 obs_var1 <- dim(player_stats) 
@@ -55,7 +55,7 @@ These players also had a secondary issue where they had different teams listed d
 After grouping the data together there was some calculation errors discovered in some of the field goal percentage statistics. These issues arose as some filed goal values presenetd as NA and some attempt values were 0 so after the field goal calucaltion were completed the resultant figure was invalid. The second issed occured through a zero division error as there was not attempted shots so therofore the divsion resulted in an NA instead of a zero. During the recalcuation the effective field goal statistics was also included in the data, this statistics takes into account the extra worth of a 3 point percentage. The effective field goal is calcualted by using the formula  $(FG + 0.5 * 3P) / FGA$^(4)^. \n
 
 ## Team Data
-```{r Team stats}
+```{r include=F}
 # Running the cleaning scripts from the funs folder to seperate the cleaninig and model analysis
 source("funs/clean_team-stats.R")
 obs_var2 <- dim(team_stats)
@@ -63,23 +63,105 @@ obs_var2 <- dim(team_stats)
 The team data was sourced from three different sources, two differnet set of statistics and another seperate file that contained team payroll information. The statistical information was for each team and collected form the 2018/19 season. The two sets of team statistics were combined with the team based statistics such as pace and offensice rating removed as they were adjudged to not be applicable for player selection. The payroll data was then added to the team based data leaving the data with `r obs_var2[2]` variables and `r obs_var2[1]` observations.
 
 
-Exploratory analysis
+#Exploratory analysis
 This section should document your exploratory data analysis and may include but is not limited to:
 - checking for errors and missing values within the datasets
 - checking the distribution of variables
 - checking for relationships between variables, or differences between groups
 - justification for decisions made about data modelling
 Note that this section and the data cleaning section may be an iterative process, as you might find things about the data that need to be 'cleaned up' once you have explored the data further. 
-```{r}
+
+## Distribution
+```{r include=F}
 tm_stats <- read_csv("data/processed/cleaned_team-stats.csv")
 sum(is.na(tm_stats))
 
+source("funs/gg_hist.R")
+
+numeric_vars <- tm_stats %>% 
+  select(where(is.numeric),- c(w,g)) %>% 
+  names(.)
+
+for (i in seq_along(numeric_vars)) {
+  print(gg_hist(tm_stats, numeric_vars[i]))
+}
+
+```
+
+After looking at a distribution of all numeric variables a sleection were identfied as the most normal in overall distribution. From the seven selected variables the correlation on how many game the team won versus the variable was calculated, these correlations can be seen in table 1. As seen in table 1 the statitics that returned the best correlation with winning game was points. The distribution for pts is displayed in Figure 1, the distribution is not a perfect normal distribution and could be decsibed as bi-model with a right hand skew. Using the combination of the distribution and best correlation the poinst statistic has been chosen to be the best predictor of won game. 
+```{r echo=FALSE}
+f_tr <- round(cor(tm_stats$w, tm_stats$f_tr),2)
+pf <- round(cor(tm_stats$w, tm_stats$pf),2)
+blk <- round(cor(tm_stats$w, tm_stats$blk),2)
+trb <- round(cor(tm_stats$w, tm_stats$trb),2)
+drb <- round(cor(tm_stats$w, tm_stats$drb),2)
+ft_percent <- round(cor(tm_stats$w, tm_stats$ft_percent),2)
+fta <- round(cor(tm_stats$w, tm_stats$fta),2)
+pts <- round(cor(tm_stats$w, tm_stats$pts),2)
+
+cor_w <- rbind(f_tr, pf, blk, trb, drb, ft_percent, fta, pts)
+cor_w <- as.data.frame(cor_w)
+cor_w <- rownames_to_column(cor_w, "Statistic")
+cor_w <- rename(cor_w, "Correlation" = V1)
+knitr::kable(cor_w,caption = "Table 1.")
+
+ggplot(tm_stats, aes(pts)) +
+  geom_histogram(colour = '#048BA8', fill = '#16DB93', alpha = 0.8, binwidth = 150) +
+  labs(title = "Distribution of points",
+       x = "Total Points",
+       caption = "Figure 1") + 
+  theme_bw()
+
+```
+
+
+## Relationships
+In Figure 2 the relationship between points and winning games has been presented to reinforce the decsion that points will be the best indication for games won. Therefore points will be targeted as the response variable and the other varibles will be used to predict it. In an attempt to standardise the variables all have been converted to per game amounts  as opposed to season total amounts. 
+```{r echo=FALSE}
 ggplot(tm_stats, aes(w, pts)) +
   geom_point() + 
-  geom_smooth(method = "lm", se = F, linetype = "dashed", colour = "red")
-
+  geom_smooth(method = "lm", se = F, linetype = "dashed", colour = "red") +
+  labs(title = "Relatioship between Wins and Points",
+       x = "Wins",
+       y = "Points",
+       caption = "Figure 2") +
+  theme_bw()
 cor(tm_stats$w, tm_stats$pts)
+```
+All explanatory variables were assesed visually for their relationship with points and the correlation coefffinet was calcualted. Through teh iterative priocess of modelling some variables were also removed at this stage due to multicolinearty, a poor linear relationship in the model or a slope confidence interval that stradded zero. \n
 
+These varible were removed due to a low correlation coefffinet of between -0.2 to 0.2:
+*2pa
+*mp
+*tov
+*pf
+*ft_percent
+*stl
+*orb
+
+These varible were removed due to a multicolinearty:
+*e_fg_percent
+*ft_fga
+*fg
+*x3p
+*x3p_ar
+*ft
+*fta
+*drb
+*fg_percent
+*x2p_percent
+*x3p_percent
+
+These varible were removed due to a poor linear relationship in the model:
+*blk
+
+These varible were removed due to an unreliable confidence interval on their slope prediction:
+*x3pa
+*x2p
+*trb
+*ast
+
+```{r include=F}
 # convert stats to per game
 tm_stats <- tm_stats %>% 
   mutate(mp = mp/g,
@@ -105,15 +187,11 @@ tm_stats <- tm_stats %>%
             pf = pf/g,
             pts = pts/g)
 
-# variables removed as they will not add to predicting points scored
 team <- tm_stats$team
 
+# variables removed as they will not add to predicting points scored
 tm_stats <- tm_stats %>% 
   select(!c(g, rk,team, team_id, salary, w))
-
-  
-ggplot(tm_stats, aes(pts)) +
-  geom_histogram(colour = '#048BA8', fill = '#16DB93', alpha = 0.8, binwidth = 2) 
 
 source("funs/gg_scatter.R")
 
@@ -151,25 +229,127 @@ tm_stats <- tm_stats %>%
   select(!c(x3pa, x2p, trb, ast))
 
 ```
-Data modelling and results
-This section may include but is not limited to:
-- data modelling (e.g. creating a linear regression)
-- assumption checking
-- model output and interpretation of your model
-```{r}
+
+## Justification
+As points has a resonably normal distribution and a correlation coefficent of 0.66 it is belive that it will provide the predictor for overall games win. It is possible thats another statistic that has a better distribution would model better in the data and be more predictable but as the overall goal is too increase wins it is important that the statistic chosen has strong relationship to winning 
+
+#Data modelling and results
+## Modelling
+Through the previous cleaning and explaortaoion of the data the best explantory variables have been included in the multiple minear regression model. These varibles include F-tr,ts_percent and fga. The relavant assumptions have been conducted on the data to ensure all varibles meet the requirement of a multiple minear regression model.
+
+## Assumptions
+```{r include=FALSE}
 # Model
 fit <- lm(pts ~ ., tm_stats)
 tidy(fit, conf.int = T)
 summary(fit)
 ```
 
-
-```{r}
+Continous Varibles
+* The reponse varible in points is a continous variable and all explanatory variables are also continous
+Linear relationship
+* There is an obvious linear relationship between all explanatory variables and points. This has been confirmed used the car package and avPlots function
+```{r echo=FALSE}
 # Linearity
 car::avPlots(fit)
 ```
+Outliers
+* The outlier plot in Figure 3 shows no obvious outliers
+```{r echo=FALSE}
+#outliers
+std_res <- rstandard(fit)
+points <- 1:length(std_res)
+ggplot(NULL, aes(points, std_res)) +
+  geom_point() +
+  ylim(c(-4,4)) +
+  geom_hline(yintercept = c(-3,3) , colour = "red", linetype = "dashed") + 
+  labs(title = "Residual plot",
+       x = "",
+       y = "Residuals",
+       caption = "Figure 3") +
+  theme_bw()
+
+# no obvious outliers
+```
+
+```{r include=FALSE}
+# Leverage points
+tmpdf <- tm_stats 
+tmpdf$hats <- hatvalues(fit)
+lev_labels <- if_else(tmpdf$hats >= 0.4, paste(team), "")
+
+ggplot(tmpdf, aes(points, hats)) +
+  geom_point() +
+  ggrepel::geom_text_repel(aes(label = lev_labels), colour = "navy")
+
+
+# Influence
+cook <- cooks.distance(fit)
+cook_labels <- if_else(cook >= 1, paste(team), "")
+
+ggplot(NULL, aes(points, cook)) +
+  geom_point() +
+  ggrepel::geom_text_repel(aes(label = cook_labels), colour = "navy")
+
+
+```
+
+
+Independence
+* Using the car package and the durbinWatsonTest package a Durbin Watson statistic of 2.28 is returned which indicates a normal range and shows the model is independent.
+```{r}
+# Independence
+car::durbinWatsonTest(fit)
+# can range from 0 - 4
+# 2 means observations are independent
+
+```
+
+Homoscedasticity
+* To assess the homoscedasticity the predicted values are plotted against the residuals. Ideally this figure 4 will show a random spread of point which will indicate homoscedasticity.
 
 ```{r}
+# Homoscedasticity
+res <- residuals(fit)
+fitted <- predict(fit)
+res_labels <- if_else(res >= .1 | res <= -.12, paste(team), "")
+ggplot(NULL, aes(fitted, res)) +
+  geom_point() +
+  geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
+  ggrepel::geom_text_repel(aes(label = res_labels), colour = "navy") +
+    labs(title = "Predicted Values against Residuals",
+       x = "Preditec",
+       y = "Residuals",
+       caption = "Figure 4") +
+  theme_bw()
+
+
+# ideally a random spread with no clear pattern
+```
+
+Normally distributed
+* To assess the distriutionof the model the normality of residuals can be viewed. By looking at a histogram of the residuals and a qqplot it can be seen that teh resiudals appear normal 
+```{r}
+# Normality of residuals
+
+ggplot(NULL, aes(res)) +
+  geom_histogram(binwidth = .07)
+
+ggplot(NULL, aes(sample =res)) +
+  stat_qq() +
+  stat_qq_line()
+
+```
+
+## Model output
+This section may include but is not limited to:
+- data modelling (e.g. creating a linear regression)
+- assumption checking
+- model output and interpretation of your model
+
+
+
+```{r include=FALSE}
 # multicolinearty
 cor_mat <- tm_stats %>% 
   select(where(is.numeric)) %>% 
@@ -183,78 +363,9 @@ car::vif(fit)
 sqrt(car::vif(fit))
 ```
 
-```{r}
-#outliers
-std_res <- rstandard(fit)
-points <- 1:length(std_res)
-ggplot(NULL, aes(points, std_res)) +
-  geom_point() +
-  ylim(c(-4,4)) +
-  geom_hline(yintercept = c(-3,3) , colour = "red", linetype = "dashed")
-
-# no obvious outliers
-```
-
-```{r}
-# Leverage points
-tmpdf <- tm_stats 
-tmpdf$hats <- hatvalues(fit)
-lev_labels <- if_else(tmpdf$hats >= 0.4, paste(team), "")
-
-ggplot(tmpdf, aes(points, hats)) +
-  geom_point() +
-  ggrepel::geom_text_repel(aes(label = lev_labels), colour = "navy")
-
-```
-
-```{r}
-# Influence
-cook <- cooks.distance(fit)
-cook_labels <- if_else(cook >= 1, paste(team), "")
-
-ggplot(NULL, aes(points, cook)) +
-  geom_point() +
-  ggrepel::geom_text_repel(aes(label = cook_labels), colour = "navy")
 
 
-```
 
-```{r}
-# Independence
-car::durbinWatsonTest(fit)
-# can range from 0 - 4
-# 2 means observations are independent
-
-```
-
-```{r}
-# Homoscedasticity
-res <- residuals(fit)
-fitted <- predict(fit)
-res_labels <- if_else(res >= .1 | res <= -.12, paste(team), "")
-
-
-ggplot(NULL, aes(fitted, res)) +
-  geom_point() +
-  geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
-  ggrepel::geom_text_repel(aes(label = res_labels), colour = "navy")
-
-# ideally a random spread with no clear pattern
-
-
-```
-
-```{r}
-# Normality of residuals
-
-ggplot(NULL, aes(res)) +
-  geom_histogram(binwidth = .07)
-
-ggplot(NULL, aes(sample =res)) +
-  stat_qq() +
-  stat_qq_line()
-
-```
 
 
 Player recommendations
