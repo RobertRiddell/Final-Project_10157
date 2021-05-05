@@ -342,13 +342,11 @@ ggplot(NULL, aes(sample =res)) +
 ```
 
 ## Model output
-This section may include but is not limited to:
-- data modelling (e.g. creating a linear regression)
-- assumption checking
-- model output and interpretation of your model
-
-
-
+The model output shows an adjetsed R sqaure value of 0.99 which indicates a very accuarate model but may be an indiation of overfitting in a small dataset. The slope coeffients are positive values which indicates as they increase so will points. For instance, teh slope coeffient for fga is 1.23 which shows that for every 1.23 shots taken per game there will be 1 point return when all other values are held constant.
+```{r include=FALSE}
+tidy(fit, conf.int = T)
+summary(fit)
+```
 ```{r include=FALSE}
 # multicolinearty
 cor_mat <- tm_stats %>% 
@@ -361,14 +359,10 @@ cor_features <- caret::findCorrelation(cor_mat, cutoff = 0.8, names = T, exact =
 # Variance Inflation Factor
 car::vif(fit)
 sqrt(car::vif(fit))
+
+tm_stats
 ```
-
-
-
-
-
-
-Player recommendations
+# Player recommendations
 This section will be the key part that is presented to the general manager. Here you should present your recommendations for the best five starting players, but also think about what other important information they would want to know, and how it is best to present that information to them. 
 ```{r}
 team_mins <- read_csv("data/processed/cleaned_team-stats.csv")
@@ -471,11 +465,9 @@ player_stats %>%
 
 ```
 
-Summary 
+# Summary 
 Provide a brief summary which describes the key points and findings from your project. It will also be important to acknowledge any limitations of your model and overall approach to answering the question asked of you by the general manager.
-```{r}
 
-```
 Reference List
 Provide a reference list of any sources you used in the development of your report and justification of your arguments. Please use the Vancouver reference style (Links to an external site.) for the reference list and in-text references. 
 
