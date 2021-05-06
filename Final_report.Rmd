@@ -13,20 +13,20 @@ library(broom)
 ```
 # Introduction
 ## Background
-Basketball is a team sport composed of 5 players per team and was invented around 1891 by James Naismith^(1)^. The game has evolved signifntly since then and is now a very popular and lucaratcive sport internationalal. Both players and organistions are able to earn a signfinat amount of money through sponsorship and media rights^(2)^. In an attempt to even the financial playing field a the modern salary cap was introduced in the 1984-85 season with a \$3,600,00 cap. The salary system has grown into a very complex and regualted system that ensures organisation's aren't able to spend any money they want on players. The NBA salary system is descriped as a soft cap due to a system of salary cap exceptions and is based off teams basketabll related income. Due to the NBA operating a soft cap it means their can be some range in what salary can be committed to players. Organisations needs to very strategic in the way they structure player contract in order to maximse the money they spend^(3).^ \n
+Basketball is a team sport composed of 5 players per team and was invented around 1891 by James Naismith^(1)^. The game has evolved significantly since then and is now a very popular and lucrative sport internationally. Both players and organisations are able to earn a significant amount of money through sponsorship and media rights^(2)^. To even the financial playing field the modern salary cap was introduced in the 1984-85 season with a \$3,600,00 cap. The salary system has grown into a very complex and regulated system that ensures organisations are not able to spend any money they want on players. The NBA salary system is described as a soft cap due to a system of salary cap exceptions and is based off team’s basketball related income. Due to the NBA operating a soft cap it means there can be some range in what salary can be committed to players. Organisations needs to very strategic in the way they structure player contract in order to maximise the money they spend^(3).^ \n
 
 ## Scenario
-The Chicago Bulls finished 27 from 30 teams in the most recent season, totally 22 wins from 82 games. Their point production was 104.5 points per game which ranks as the 26 out of 30 teams. As opposed to the Milwaukee Bucks who excelled with 60 wins and an average points per game of 118.1. The Chicago Bulls are coming into this season with an available \$118 million dollars for contracting players, which is 26 out of 30 compared to the rest of the league. Where the Milwaukee Bucks had \$131 million budget, showing the disapartity on avaiable budgets. \n
+The Chicago Bulls finished 27 from 30 teams in the most recent season, totally 22 wins from 82 games. Their point production was 104.5 points per game which ranks as the 26 out of 30 teams. As opposed to the Milwaukee Bucks who excelled with 60 wins and an average points per game of 118.1. The Chicago Bulls are coming into this season with an available \$118 million dollars for contracting players, which is 26 out of 30 compared to the rest of the league. Where the Milwaukee Bucks had \$131 million budget, showing the disparity on available budgets. \n
 
 ## Aim
-The aim of this report is to flag and identify players that will enhance the probabaility of the Chicago Bulls winning more games than last season. \n
+The aim of this report is to flag and identify players that will enhance the probability of the Chicago Bulls winning more games than last season. \n
 
 ## Justification
-The reason this report is nesscacry is shown by the discrepency between what can be spent on players and what the Chicago Bulls can spend on players. This discrepenacy highlights that the Chicago Bulls are not able to just recruit any player and instead must be strategic to ensure they buy players that will have a positive influence on winning for their team. \n
+The reason this report is necessary is shown by the discrepancy between what can be spent on players and what the Chicago Bulls can spend on players. This discrepancy highlights that the Chicago Bulls are not able to just recruit any player and instead must be strategic to ensure they buy players that will have a positive influence on winning for their team. \n
 
 
 # Wrangling data
-The descriptions and infomrtion about the data used in this report can be found at [Data Descriptions](https://github.com/RobertRiddell/Final-Project_10157/tree/main/data-descriptions). \n
+The descriptions and information  about the data used in this report can be found at [Data Descriptions](https://github.com/RobertRiddell/Final-Project_10157/tree/main/data-descriptions). \n
 
 ## Player Data
 ```{r include=F}
@@ -43,16 +43,16 @@ two_team_players <- player_stats %>%
 
 
 ```
-The player data consited of `r obs_var1[2]` variables and `r obs_var1[1]` observations tabulated fromthe 2018/19 season. This data set included `r num_players` unique players which is assumed to be all of the active players in the league.
+The player data consisted of `r obs_var1[2]` variables and `r obs_var1[1]` observations tabulated from the 2018/19 season. This data set included `r num_players` unique players which is assumed to be all the active players in the league.
 
-The data relavant to players was read in and cleaned in accordance with the tidyr principles https://tidyr.tidyverse.org/articles/tidy-data.html. \n
-The first issue that needed investigating was when a player had been traded during the season had both the statistcis for the teams they had played for and a total row for all their statistics. There was `r two_team_players` players affected by this issue.  To resolve this issue the total row for affected players was removed from the data, leaving some players with multiple rows. \n
+The data relevant to players was read in and cleaned in accordance with the tidyr principles https://tidyr.tidyverse.org/articles/tidy-data.html. \n
+The first issue that needed investigating was when a player had been traded during the season had both the statistics for the teams they had played for and a total row for all their statistics. There was `r two_team_players` players affected by this issue.  To resolve this issue the total row for affected players was removed from the data, leaving some players with multiple rows. \n
 
-The next issue noted was some players had different positions listed, such as Thon Maker who was listed as a PF for Detroit and a Center for Milwakee. It was decided that the player would be assigned the poistion they played the most games at. To do this the number of games was totalled for all players and a new postion list was tabulated to overwrite the old positions. This function reassigned the players poistion on all observations to teh position they played most during the season. \n
+The next issue noted was some players had different positions listed, such as Thon Maker who was listed as a PF for Detroit and a Center for Milwaukee. It was decided that the player would be assigned the position they played the most games at. To do this the number of games was totalled for all players and a new position list was tabulated to overwrite the old positions. This function reassigned the players position on all observations to the position they played most during the season. \n
 
-These players also had a secondary issue where they had different teams listed due to being traded. This issue was solved using the same method as the positions, where the player was assigne th etam they played the most amount of games from. The player data was then grouped under each name so each player only had one observation in the dataset. \n
+These players also had a secondary issue where they had different teams listed due to being traded. This issue was solved using the same method as the positions, where the player was assigned the team they played the most number of games from. The player data was then grouped under each name, so each player only had one observation in the dataset. \n
 
-After grouping the data together there was some calculation errors discovered in some of the field goal percentage statistics. These issues arose as some filed goal values presenetd as NA and some attempt values were 0 so after the field goal calucaltion were completed the resultant figure was invalid. The second issed occured through a zero division error as there was not attempted shots so therofore the divsion resulted in an NA instead of a zero. During the recalcuation the effective field goal statistics was also included in the data, this statistics takes into account the extra worth of a 3 point percentage. The effective field goal is calcualted by using the formula  $(FG + 0.5 * 3P) / FGA$^(4)^. \n
+After grouping the data together there was some calculation errors discovered in some of the field goal percentage statistics. These issues arose as some filed goal values presented as NA and some attempt values were 0 so after the field goal calculation were completed the resultant figure was invalid. The second issue occurred through a zero-division error as there was not attempted shots so therefore the division resulted in an NA instead of a zero. During the recalculation the effective field goal statistics was also included in the data, this statistic takes into account the extra worth of a 3 point percentage. The effective field goal is calculated by using the formula  $(FG + 0.5 * 3P) / FGA$^(4)^. \n
 
 ## Team Data
 ```{r include=F}
@@ -64,13 +64,6 @@ The team data was sourced from three different sources, two differnet set of sta
 
 
 #Exploratory analysis
-This section should document your exploratory data analysis and may include but is not limited to:
-- checking for errors and missing values within the datasets
-- checking the distribution of variables
-- checking for relationships between variables, or differences between groups
-- justification for decisions made about data modelling
-Note that this section and the data cleaning section may be an iterative process, as you might find things about the data that need to be 'cleaned up' once you have explored the data further. 
-
 ## Distribution
 ```{r include=F}
 tm_stats <- read_csv("data/processed/cleaned_team-stats.csv")
@@ -88,7 +81,7 @@ for (i in seq_along(numeric_vars)) {
 
 ```
 
-After looking at a distribution of all numeric variables a sleection were identfied as the most normal in overall distribution. From the seven selected variables the correlation on how many game the team won versus the variable was calculated, these correlations can be seen in table 1. As seen in table 1 the statitics that returned the best correlation with winning game was points. The distribution for pts is displayed in Figure 1, the distribution is not a perfect normal distribution and could be decsibed as bi-model with a right hand skew. Using the combination of the distribution and best correlation the poinst statistic has been chosen to be the best predictor of won game. 
+After looking at a distribution of all numeric variables a selection was identified as the most normal in overall distribution. From the seven selected variables the correlation on how many games the team won versus the variable was calculated, these correlations can be seen in table 1. As seen in table 1 the statistics that returned the best correlation with winning game was points. The distribution for pts is displayed in Figure 1, the distribution is not a perfect normal distribution and could be described as bimodal with a right hand skew. Using the combination of the distribution and best correlation the point statistic has been chosen to be the best predictor of won game.
 ```{r echo=FALSE}
 f_tr <- round(cor(tm_stats$w, tm_stats$f_tr),2)
 pf <- round(cor(tm_stats$w, tm_stats$pf),2)
@@ -116,7 +109,7 @@ ggplot(tm_stats, aes(pts)) +
 
 
 ## Relationships
-In Figure 2 the relationship between points and winning games has been presented to reinforce the decsion that points will be the best indication for games won. Therefore points will be targeted as the response variable and the other varibles will be used to predict it. In an attempt to standardise the variables all have been converted to per game amounts  as opposed to season total amounts. 
+In Figure 2 the relationship between points and winning games has been presented to reinforce the decision that points will be the best indication for games won. Therefore, points will be targeted as the response variable and the other variables will be used to predict it. To standardise the variables all have been converted to per game amounts as opposed to season total amounts.
 ```{r echo=FALSE}
 ggplot(tm_stats, aes(w, pts)) +
   geom_point() + 
@@ -128,9 +121,9 @@ ggplot(tm_stats, aes(w, pts)) +
   theme_bw()
 cor(tm_stats$w, tm_stats$pts)
 ```
-All explanatory variables were assesed visually for their relationship with points and the correlation coefffinet was calcualted. Through teh iterative priocess of modelling some variables were also removed at this stage due to multicolinearty, a poor linear relationship in the model or a slope confidence interval that stradded zero. \n
+All explanatory variables were assessed visually for their relationship with points and the correlation coefficient was calculated. Through the iterative process of modelling some variables were also removed at this stage due to multicollinearity, a poor linear relationship in the model or a slope confidence interval that straddled zero. \n
 
-These varible were removed due to a low correlation coefffinet of between -0.2 to 0.2:
+These variables were removed due to a low correlation coefficient of between -0.2 to 0.2:
 *2pa
 *mp
 *tov
@@ -139,7 +132,7 @@ These varible were removed due to a low correlation coefffinet of between -0.2 t
 *stl
 *orb
 
-These varible were removed due to a multicolinearty:
+These variables were removed due to a multicollinearity:
 *e_fg_percent
 *ft_fga
 *fg
@@ -152,15 +145,14 @@ These varible were removed due to a multicolinearty:
 *x2p_percent
 *x3p_percent
 
-These varible were removed due to a poor linear relationship in the model:
+These variables were removed due to a poor linear relationship in the model:
 *blk
 
-These varible were removed due to an unreliable confidence interval on their slope prediction:
+These variables were removed due to an unreliable confidence interval on their slope prediction:
 *x3pa
 *x2p
 *trb
 *ast
-
 ```{r include=F}
 # convert stats to per game
 tm_stats <- tm_stats %>% 
@@ -231,11 +223,12 @@ tm_stats <- tm_stats %>%
 ```
 
 ## Justification
-As points has a resonably normal distribution and a correlation coefficent of 0.66 it is belive that it will provide the predictor for overall games win. It is possible thats another statistic that has a better distribution would model better in the data and be more predictable but as the overall goal is too increase wins it is important that the statistic chosen has strong relationship to winning 
+As points has a reasonably normal distribution and a correlation coefficient of 0.66 it is believed that it will provide the predictor for overall games win. It is possible that another statistic that has a better distribution would model better in the data and be more predictable but as the overall goal is too increase wins it is important that the statistic chosen has strong relationship to winning 
 
 #Data modelling and results
 ## Modelling
-Through the previous cleaning and explaortaoion of the data the best explantory variables have been included in the multiple minear regression model. These varibles include F-tr,ts_percent and fga. The relavant assumptions have been conducted on the data to ensure all varibles meet the requirement of a multiple minear regression model.
+Through the previous cleaning and exploration of the data the best explanatory variables have been included in the multiple linear regression model. These variables include F-tr,ts_percent and fga. The relevant assumptions have been conducted on the data to ensure all variables meet the requirement of a multiple linear regression model.
+
 
 ## Assumptions
 ```{r include=FALSE}
@@ -245,16 +238,17 @@ tidy(fit, conf.int = T)
 summary(fit)
 ```
 
-Continous Varibles
-* The reponse varible in points is a continous variable and all explanatory variables are also continous
+Continuous Variables
+* The response variables in points are a continuous variable and all explanatory variables are also continuous.
 Linear relationship
-* There is an obvious linear relationship between all explanatory variables and points. This has been confirmed used the car package and avPlots function
+* There is an obvious linear relationship between all explanatory variables and points. This has been confirmed used the car package and avPlots function.
+
 ```{r echo=FALSE}
 # Linearity
 car::avPlots(fit)
 ```
 Outliers
-* The outlier plot in Figure 3 shows no obvious outliers
+* The outlier plot in Figure 3 shows no obvious outliers.
 ```{r echo=FALSE}
 #outliers
 std_res <- rstandard(fit)
@@ -328,7 +322,8 @@ ggplot(NULL, aes(fitted, res)) +
 ```
 
 Normally distributed
-* To assess the distriutionof the model the normality of residuals can be viewed. By looking at a histogram of the residuals and a qqplot it can be seen that teh resiudals appear normal 
+* To assess the distribution of the model the normality of residuals can be viewed. By looking at a histogram of the residuals and a qqplot the residuals appear normal.
+
 ```{r}
 # Normality of residuals
 
@@ -342,7 +337,7 @@ ggplot(NULL, aes(sample =res)) +
 ```
 
 ## Model output
-The model output shows an adjetsed R sqaure value of 0.99 which indicates a very accuarate model but may be an indiation of overfitting in a small dataset. The slope coeffients are positive values which indicates as they increase so will points. For instance, teh slope coeffient for fga is 1.23 which shows that for every 1.23 shots taken per game there will be 1 point return when all other values are held constant.
+The model output shows an adjusted R sqaure value of 0.99 which indicates a very accurate model but may be an indication of overfitting in a small dataset. The slope coefficients are positive values which indicates as they increase so will points. For instance, the slope coefficient for fga is 1.23 which shows that for every 1.23 shots taken per game there will be 1 point return when all other values are held constant.
 ```{r include=FALSE}
 tidy(fit, conf.int = T)
 summary(fit)
@@ -362,8 +357,9 @@ sqrt(car::vif(fit))
 
 tm_stats
 ```
-# Player recommendations
-This section will be the key part that is presented to the general manager. Here you should present your recommendations for the best five starting players, but also think about what other important information they would want to know, and how it is best to present that information to them. 
+#Player recommendation
+In order to evaluate and understand players their expected point performance needs to be assessed by the constructed model. A factor that will affect a player overall expected performance is the amount of opportunity they have been given. For instance, a player that has played many more minutes should therefore have a higher number of statistics. In an attempt to mitigate this issue all players statistics can be normalised based on the average amount of minutes per game. This assumption will transform player statistics to what they would be if all players played the same minutes, obviously this assumption may not hold true based on many factors, but it is better to assess players on a more even playing field than let past opportunity be an overwhelming factor that determines future performance. 
+
 ```{r}
 team_mins <- read_csv("data/processed/cleaned_team-stats.csv")
 
@@ -425,6 +421,15 @@ player_stats %>%
   mutate(salary_points_ratio = exp_pts/salary) %>% 
   arrange(-salary_points_ratio) %>% 
   filter(Pos == "C")
+
+player_stats %>% 
+  group_by(Pos) %>% 
+  filter(mp > 250) %>% 
+  mutate(`Salary Rank` = rank(-salary),
+         `Expected points rank` = rank(-exp_pts)) %>% 
+  arrange(`Expected points rank`) %>% 
+  filter(Pos == "PF")
+  
 # Jordan McRae	      27	333	  SG	77250	    116.136416	
 # Christian Wood      23	502	  PF	1512601	  159.108397	
 # Spencer Dinwiddie	  25	1914	PG	1656092	  141.702753
@@ -437,8 +442,7 @@ player_stats %>%
 player_stats %>% 
   select(player_name, age, mp, Pos, salary, exp_pts) %>% 
   filter(mp > 300) %>% 
-  arrange(-exp_pts) %>% 
-  filter(Pos == "C")
+  arrange(-exp_pts) 
 # D'Angelo Russell	  22	2448	PG	7019698	  175.12603
 # Devin Booker	      22	2242	SG	3314365	  177.381624
 # Kawhi Leonard	      27	2040	SF	23114066	180.49953
@@ -451,8 +455,7 @@ player_stats %>%
 player_stats %>% 
   select(player_name, age, mp, Pos, salary, exp_pts) %>% 
   filter(mp > 300) %>% 
-  arrange(-exp_pts) %>% 
-  filter(Pos == "C")
+  arrange(-exp_pts) 
 # James Harden	          29	2867	PG	30570000	219.13162
 # Devin Booker	          22	2242	SG	3314365	  177.381624
 # Kawhi Leonard	          27	2040	SF	23114066	180.49953
@@ -462,18 +465,80 @@ player_stats %>%
 # 30570000 + 3314365 + 23114066 + 24157304 + 25467250 = 106,622,985
 # 219.13162 + 177.381624 + 180.71463 + 188.13349 + 186.03184 = 951.3932
 
+value_team <- player_stats %>% 
+  filter(mp > 250) %>% 
+  group_by(Pos) %>% 
+  mutate(`Salary Rank` = rank(-salary),
+         `Expected points rank` = rank(-exp_pts)) %>% 
+  arrange(`Expected points rank`) %>% 
+  filter(player_id == 565| 
+         player_id == 150|
+         player_id == 327|
+         player_id == 86|
+         player_id == 365) %>% 
+  select(player_name, age, Pos, mp, salary, exp_pts, `Salary Rank`, `Expected points rank`) %>% 
+  rename("Player Name" = player_name, "Age" = age, "Position" = Pos, "Minutes Played" = mp, "Expected Points" = exp_pts) %>% 
+  arrange(Position)
+
+
+highoutput_team <- player_stats %>% 
+  filter(mp > 250) %>% 
+  group_by(Pos) %>% 
+  mutate(`Salary Rank` = rank(-salary),
+         `Expected points rank` = rank(-exp_pts)) %>% 
+  arrange(`Expected points rank`) %>% 
+  filter(player_id == 224| 
+         player_id == 67|
+         player_id == 324|
+         player_id == 20|
+         player_id == 166) %>% 
+  select(player_name, age, Pos, mp, salary, exp_pts, `Salary Rank`, `Expected points rank`) %>% 
+  rename("Player Name" = player_name, "Age" = age, "Position" = Pos, "Minutes Played" = mp, "Expected Points" = exp_pts) %>% 
+  arrange(Position)
+
+moderate_team <- player_stats %>% 
+  group_by(Pos) %>% 
+  filter(mp > 250) %>% 
+  mutate(`Salary Rank` = rank(-salary),
+         `Expected points rank` = rank(-exp_pts)) %>% 
+  arrange(`Expected points rank`) %>% 
+  filter(player_id == 469| 
+         player_id == 67|
+         player_id == 324|
+         player_id == 565|
+         player_id == 522) %>% 
+  select(player_name, age, Pos, mp, salary, exp_pts, `Salary Rank`, `Expected points rank`) %>% 
+  rename("Player Name" = player_name, "Age" = age, "Position" = Pos, "Minutes Played" = mp, "Expected Points" = exp_pts) %>% 
+  arrange(Position)
+```
+## Value for money
+Using another metric derived from expected points/ salary, an understanding of the players output based on their cost can be constructed. It was possible to use this metric to select the cheapest team possible that has a moderate expected point score. This team would return an overall expected points figure of 667.89 and incur a salary of $6,326,985. This strategy certainly leaves plenty of budget for other players, but the overall expected points would not produce a significant number of wins. 
+```{r}
+knitr::kable(value_team,caption = "Table 2: *Salary and Expected Points Ranks are grouped by position")
+```
+## High Output
+At the other end of the spectrum the best team’s expected points output would be 951.3932 but would incur a salary of $106,622,985. As players that have high output will generally record a high wage which would use up the vast majority of team’s budget. Cleary this team would not allow sufficient funds to recruit a bench unit so while the starting 5 may be excellent they are unable to play every minute of every game. With that in mind this strategy doesn’t seem a sensible or strategic decision. 
+```{r}
+knitr::kable(highoutput_team,caption = "Table 3: *Salary and Expected Points Ranks are grouped by position")
+```
+## Moderate team
+If we approach the selection with both the overall player output and their total salary in mind, we are able to recruit a more moderate team that has an expected output of 863.10 with a salary of $42,800,165. As seen from the more efficient team Christian Wood has been selected due to his value for money but also in expected poins for his position. Kawhi Leonard is selected even though he incurs a high wage any player that is even a little bit cheaper has a signinfilat lower expected points figure, this makes him worth the high price. Karl Anthony Towns, Devin Booker and D'Angelo Russell are all selected as they are top 5 at their position for points and conversly much lower ranked for their salary. As this teams’ salary is also moderate it will allow for plenty of budget for the other 7-10 players required. There is enough salary remaining the team could afford to invest heavily in 2-3 players to make up the core of the bench unit and be good cover for injury for the starting players. These are the five player who appear as the best value for money while also being able to deliver an increased number of wins.  
+```{r}
+knitr::kable(moderate_team,caption = "Table 4: *Salary and Expected Points Ranks are grouped by position")
 
 ```
 
-# Summary 
-Provide a brief summary which describes the key points and findings from your project. It will also be important to acknowledge any limitations of your model and overall approach to answering the question asked of you by the general manager.
+#Summary
+The model constructed in this report is one that represent as very accurate, there is a concern that due to the small number of samples the model is overfitting the data and predicting the exact points which will lead to poor prediction with unfamiliar data. \n
+Other limitations of using points to predict game wins is the overall correlation of .66 is reasonable but not perfect, as seen in Figure 2 there are plenty of teams that scored plenty of points and underperformed in relation to wins and vice versa some teams had lower total points but overperformed on wins. This may mean the recruited team can score a high number of total points but be unable to convert those points to won games. \n
+The model also does not include any statistics outside of scoring points, as the prediction was aimed at points it logically means that the best variable will be directly related to scoring points. This will mean the model will give the best expected point rating to players that are good shooters and take lots of shots. Scoring points is an important element of basketball but not the whole picture, so it would be advisable with the remaining team budget be focused on players that ore skill lay outside of scoring points. In this way it would give the team balance and through the flow of the team’s rotations team would have both the capability to score lots of points and hold opposition teams to low scores
 
-Reference List
+#Reference List
 Provide a reference list of any sources you used in the development of your report and justification of your arguments. Please use the Vancouver reference style (Links to an external site.) for the reference list and in-text references. 
 
 1.	Donald LW, Logan RG, Mokray WG. Basketball. In: Encyclopedia Britannica. 2021.
 2.	Reiff N. How the NBA makes money [Internet]. Investopedia.com. 2020 [cited 2021 May 3]. Available from: https://www.investopedia.com/articles/personal-finance/071415/how-nba-makes-money.asp
 3.	CBA Breakdown [Internet]. Cbabreakdown.com. [cited 2021 May 3]. Available from: https://cbabreakdown.com/salary-cap-overview
-4. Page B, Page B. Glossary | Basketball-Reference.com [Internet]. Basketball-Reference.com. 2021 [cited 3 May 2021]. Available from: https://www.basketball-reference.com/about/glossary.html#:~:text=eFG%25%20%2D%20Effective%20Field%20Goal%20Percentage,a%202%2Dpoint%20field%20goal
+4.  Page B, Page B. Glossary | Basketball-Reference.com [Internet]. Basketball-Reference.com. 2021 [cited 3 May 2021]. Available from: https://www.basketball-reference.com/about/glossary.html#:~:text=eFG%25%20%2D%20Effective%20Field%20Goal%20Percentage,a%202%2Dpoint%20field%20goal
 
  
