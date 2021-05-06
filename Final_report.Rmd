@@ -54,7 +54,7 @@ two_team_players <- player_stats %>%
 ```
 The player data consisted of `r obs_var1[2]` variables and `r obs_var1[1]` observations tabulated from the 2018/19 season. This data set included `r num_players` unique players which is assumed to be all the active players in the league.
 
-The data relevant to players was read in and cleaned in accordance with the tidyr principles https://tidyr.tidyverse.org/articles/tidy-data.html. \n
+The data relevant to players was read in and cleaned in accordance with the [tidyr principles](https://tidyr.tidyverse.org/articles/tidy-data.html). \n
 The first issue that needed investigating was when a player had been traded during the season had both the statistics for the teams they had played for and a total row for all their statistics. There was `r two_team_players` players affected by this issue.  To resolve this issue the total row for affected players was removed from the data, leaving some players with multiple rows. \n
 
 The next issue noted was some players had different positions listed, such as Thon Maker who was listed as a PF for Detroit and a Center for Milwaukee. It was decided that the player would be assigned the position they played the most games at. To do this the number of games was totalled for all players and a new position list was tabulated to overwrite the old positions. This function reassigned the players position on all observations to the position they played most during the season. \n
