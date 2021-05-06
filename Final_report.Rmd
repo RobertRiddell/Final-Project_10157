@@ -1,8 +1,17 @@
 ---
-title: "Final_report"
+title: "Chicago Bulls Player Recommendation"
 author: "R.Riddell"
 date: "26/04/2021"
-output: html_document
+output:
+  html_document:
+    toc: yes
+    toc_depth: 1
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+    theme: flatly
+    highlight: tango
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -63,7 +72,7 @@ obs_var2 <- dim(team_stats)
 The team data was sourced from three different sources, two differnet set of statistics and another seperate file that contained team payroll information. The statistical information was for each team and collected form the 2018/19 season. The two sets of team statistics were combined with the team based statistics such as pace and offensice rating removed as they were adjudged to not be applicable for player selection. The payroll data was then added to the team based data leaving the data with `r obs_var2[2]` variables and `r obs_var2[1]` observations.
 
 
-#Exploratory analysis
+# Exploratory analysis
 ## Distribution
 ```{r include=F}
 tm_stats <- read_csv("data/processed/cleaned_team-stats.csv")
@@ -98,20 +107,21 @@ cor_w <- rownames_to_column(cor_w, "Statistic")
 cor_w <- rename(cor_w, "Correlation" = V1)
 knitr::kable(cor_w,caption = "Table 1.")
 
-ggplot(tm_stats, aes(pts)) +
+dist <- ggplot(tm_stats, aes(pts)) +
   geom_histogram(colour = '#048BA8', fill = '#16DB93', alpha = 0.8, binwidth = 150) +
   labs(title = "Distribution of points",
        x = "Total Points",
        caption = "Figure 1") + 
   theme_bw()
-
+ggsave(plot = dist, filename = "figs/figure1.jpeg")
+dist
 ```
 
 
 ## Relationships
 In Figure 2 the relationship between points and winning games has been presented to reinforce the decision that points will be the best indication for games won. Therefore, points will be targeted as the response variable and the other variables will be used to predict it. To standardise the variables all have been converted to per game amounts as opposed to season total amounts.
-```{r echo=FALSE}
-ggplot(tm_stats, aes(w, pts)) +
+```{r echo=FALSE, message=FALSE}
+scatter <- ggplot(tm_stats, aes(w, pts)) +
   geom_point() + 
   geom_smooth(method = "lm", se = F, linetype = "dashed", colour = "red") +
   labs(title = "Relatioship between Wins and Points",
@@ -119,40 +129,47 @@ ggplot(tm_stats, aes(w, pts)) +
        y = "Points",
        caption = "Figure 2") +
   theme_bw()
+ggsave(plot = scatter, filename = "figs/figure2.jpeg")
+
 cor(tm_stats$w, tm_stats$pts)
+scatter
 ```
 All explanatory variables were assessed visually for their relationship with points and the correlation coefficient was calculated. Through the iterative process of modelling some variables were also removed at this stage due to multicollinearity, a poor linear relationship in the model or a slope confidence interval that straddled zero. \n
 
 These variables were removed due to a low correlation coefficient of between -0.2 to 0.2:
-*2pa
-*mp
-*tov
-*pf
-*ft_percent
-*stl
-*orb
+
+* 2pa
+* mp
+* tov
+* pf
+* ft_percent
+* stl
+* orb
 
 These variables were removed due to a multicollinearity:
-*e_fg_percent
-*ft_fga
-*fg
-*x3p
-*x3p_ar
-*ft
-*fta
-*drb
-*fg_percent
-*x2p_percent
-*x3p_percent
+
+* e_fg_percent
+* ft_fga
+* fg
+* x3p
+* x3p_ar
+* ft
+* fta
+* drb
+* fg_percent
+* x2p_percent
+* x3p_percent
 
 These variables were removed due to a poor linear relationship in the model:
-*blk
+
+* blk
 
 These variables were removed due to an unreliable confidence interval on their slope prediction:
-*x3pa
-*x2p
-*trb
-*ast
+
+* x3pa
+* x2p
+* trb
+* ast
 ```{r include=F}
 # convert stats to per game
 tm_stats <- tm_stats %>% 
@@ -225,7 +242,7 @@ tm_stats <- tm_stats %>%
 ## Justification
 As points has a reasonably normal distribution and a correlation coefficient of 0.66 it is believed that it will provide the predictor for overall games win. It is possible that another statistic that has a better distribution would model better in the data and be more predictable but as the overall goal is too increase wins it is important that the statistic chosen has strong relationship to winning 
 
-#Data modelling and results
+# Data modelling and results
 ## Modelling
 Through the previous cleaning and exploration of the data the best explanatory variables have been included in the multiple linear regression model. These variables include F-tr,ts_percent and fga. The relevant assumptions have been conducted on the data to ensure all variables meet the requirement of a multiple linear regression model.
 
@@ -239,8 +256,11 @@ summary(fit)
 ```
 
 Continuous Variables
+
 * The response variables in points are a continuous variable and all explanatory variables are also continuous.
+
 Linear relationship
+
 * There is an obvious linear relationship between all explanatory variables and points. This has been confirmed used the car package and avPlots function.
 
 ```{r echo=FALSE}
@@ -248,12 +268,14 @@ Linear relationship
 car::avPlots(fit)
 ```
 Outliers
+
 * The outlier plot in Figure 3 shows no obvious outliers.
 ```{r echo=FALSE}
 #outliers
 std_res <- rstandard(fit)
 points <- 1:length(std_res)
-ggplot(NULL, aes(points, std_res)) +
+
+outliers <- ggplot(NULL, aes(points, std_res)) +
   geom_point() +
   ylim(c(-4,4)) +
   geom_hline(yintercept = c(-3,3) , colour = "red", linetype = "dashed") + 
@@ -262,7 +284,8 @@ ggplot(NULL, aes(points, std_res)) +
        y = "Residuals",
        caption = "Figure 3") +
   theme_bw()
-
+ggsave(plot = outliers, filename = "figs/figure3.jpeg")
+outliers
 # no obvious outliers
 ```
 
@@ -290,8 +313,9 @@ ggplot(NULL, aes(points, cook)) +
 
 
 Independence
+
 * Using the car package and the durbinWatsonTest package a Durbin Watson statistic of 2.28 is returned which indicates a normal range and shows the model is independent.
-```{r}
+```{r include=FALSE}
 # Independence
 car::durbinWatsonTest(fit)
 # can range from 0 - 4
@@ -300,14 +324,15 @@ car::durbinWatsonTest(fit)
 ```
 
 Homoscedasticity
+
 * To assess the homoscedasticity the predicted values are plotted against the residuals. Ideally this figure 4 will show a random spread of point which will indicate homoscedasticity.
 
-```{r}
+```{r echo=FALSE}
 # Homoscedasticity
 res <- residuals(fit)
 fitted <- predict(fit)
 res_labels <- if_else(res >= .1 | res <= -.12, paste(team), "")
-ggplot(NULL, aes(fitted, res)) +
+Homoscedasticity <- ggplot(NULL, aes(fitted, res)) +
   geom_point() +
   geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
   ggrepel::geom_text_repel(aes(label = res_labels), colour = "navy") +
@@ -317,14 +342,17 @@ ggplot(NULL, aes(fitted, res)) +
        caption = "Figure 4") +
   theme_bw()
 
+ggsave(plot = Homoscedasticity, filename = "figs/figure4.jpeg")
+
 
 # ideally a random spread with no clear pattern
 ```
 
 Normally distributed
+
 * To assess the distribution of the model the normality of residuals can be viewed. By looking at a histogram of the residuals and a qqplot the residuals appear normal.
 
-```{r}
+```{r echo=FALSE}
 # Normality of residuals
 
 ggplot(NULL, aes(res)) +
@@ -357,10 +385,10 @@ sqrt(car::vif(fit))
 
 tm_stats
 ```
-#Player recommendation
+# Player recommendation
 In order to evaluate and understand players their expected point performance needs to be assessed by the constructed model. A factor that will affect a player overall expected performance is the amount of opportunity they have been given. For instance, a player that has played many more minutes should therefore have a higher number of statistics. In an attempt to mitigate this issue all players statistics can be normalised based on the average amount of minutes per game. This assumption will transform player statistics to what they would be if all players played the same minutes, obviously this assumption may not hold true based on many factors, but it is better to assess players on a more even playing field than let past opportunity be an overwhelming factor that determines future performance. 
 
-```{r}
+```{r include=FALSE}
 team_mins <- read_csv("data/processed/cleaned_team-stats.csv")
 
 min_per_game <- team_mins %>% 
@@ -395,7 +423,7 @@ players <- player_stats %>%
 
 ```
 
-```{r}
+```{r include=FALSE}
 player_stats <-  player_stats %>% 
   select(player_name, age, Pos, Tm, mp)
 
@@ -513,27 +541,27 @@ moderate_team <- player_stats %>%
 ```
 ## Value for money
 Using another metric derived from expected points/ salary, an understanding of the players output based on their cost can be constructed. It was possible to use this metric to select the cheapest team possible that has a moderate expected point score. This team would return an overall expected points figure of 667.89 and incur a salary of $6,326,985. This strategy certainly leaves plenty of budget for other players, but the overall expected points would not produce a significant number of wins. 
-```{r}
-knitr::kable(value_team,caption = "Table 2: *Salary and Expected Points Ranks are grouped by position")
+```{r echo=FALSE}
+knitr::kable(value_team,caption = "Table 2: Salary and Expected Points Ranks are grouped by position")
 ```
 ## High Output
 At the other end of the spectrum the best team’s expected points output would be 951.3932 but would incur a salary of $106,622,985. As players that have high output will generally record a high wage which would use up the vast majority of team’s budget. Cleary this team would not allow sufficient funds to recruit a bench unit so while the starting 5 may be excellent they are unable to play every minute of every game. With that in mind this strategy doesn’t seem a sensible or strategic decision. 
-```{r}
-knitr::kable(highoutput_team,caption = "Table 3: *Salary and Expected Points Ranks are grouped by position")
+```{r echo=FALSE}
+knitr::kable(highoutput_team,caption = "Table 3: Salary and Expected Points Ranks are grouped by position")
 ```
 ## Moderate team
 If we approach the selection with both the overall player output and their total salary in mind, we are able to recruit a more moderate team that has an expected output of 863.10 with a salary of $42,800,165. As seen from the more efficient team Christian Wood has been selected due to his value for money but also in expected poins for his position. Kawhi Leonard is selected even though he incurs a high wage any player that is even a little bit cheaper has a signinfilat lower expected points figure, this makes him worth the high price. Karl Anthony Towns, Devin Booker and D'Angelo Russell are all selected as they are top 5 at their position for points and conversly much lower ranked for their salary. As this teams’ salary is also moderate it will allow for plenty of budget for the other 7-10 players required. There is enough salary remaining the team could afford to invest heavily in 2-3 players to make up the core of the bench unit and be good cover for injury for the starting players. These are the five player who appear as the best value for money while also being able to deliver an increased number of wins.  
-```{r}
-knitr::kable(moderate_team,caption = "Table 4: *Salary and Expected Points Ranks are grouped by position")
+```{r echo=FALSE}
+knitr::kable(moderate_team,caption = "Table 4: Salary and Expected Points Ranks are grouped by position")
 
 ```
 
-#Summary
+# Summary
 The model constructed in this report is one that represent as very accurate, there is a concern that due to the small number of samples the model is overfitting the data and predicting the exact points which will lead to poor prediction with unfamiliar data. \n
 Other limitations of using points to predict game wins is the overall correlation of .66 is reasonable but not perfect, as seen in Figure 2 there are plenty of teams that scored plenty of points and underperformed in relation to wins and vice versa some teams had lower total points but overperformed on wins. This may mean the recruited team can score a high number of total points but be unable to convert those points to won games. \n
 The model also does not include any statistics outside of scoring points, as the prediction was aimed at points it logically means that the best variable will be directly related to scoring points. This will mean the model will give the best expected point rating to players that are good shooters and take lots of shots. Scoring points is an important element of basketball but not the whole picture, so it would be advisable with the remaining team budget be focused on players that ore skill lay outside of scoring points. In this way it would give the team balance and through the flow of the team’s rotations team would have both the capability to score lots of points and hold opposition teams to low scores
 
-#Reference List
+# Reference List
 Provide a reference list of any sources you used in the development of your report and justification of your arguments. Please use the Vancouver reference style (Links to an external site.) for the reference list and in-text references. 
 
 1.	Donald LW, Logan RG, Mokray WG. Basketball. In: Encyclopedia Britannica. 2021.
